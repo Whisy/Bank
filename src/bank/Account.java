@@ -2,8 +2,8 @@ package bank;
 
 public abstract class Account
 {
-    int number;
-    int balance;
+    private int number;
+    private int balance;
     private int commission;
     private Currency currency;
 
@@ -82,7 +82,7 @@ public abstract class Account
     }
 
     // Списание комиссии
-    public void substractionCommissions() throws InsufficientFundsException {
+    public void addedCommissions() throws InsufficientFundsException {
         try {
             if (commission > this.balance) throw new InsufficientFundsException("Not enough money");
             this.balance -= commission;

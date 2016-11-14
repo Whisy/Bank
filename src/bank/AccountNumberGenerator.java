@@ -5,7 +5,7 @@ public class AccountNumberGenerator {
     private static int accountNumber = 0;
 
     public static void getNext() {
-        accountNumber += 1;
+        accountNumber ++;
     }
 
     public static int getCurrent() {

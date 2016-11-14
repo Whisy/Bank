@@ -29,7 +29,7 @@ public class CreditAccount extends Account{
 
     CreditAccount(int number) {
         super(number);
-        super.balance = 0;
+        super.addedSum(0);
         setCommission(0);
     }
 
@@ -60,14 +60,14 @@ public class CreditAccount extends Account{
             days = 366;
         } else { days = 365; }
 
-        if (this.balance < limitOfCard) {
-            interestAccrued += (limitOfCard - balance) * (interestRate / days) / 100;
+        if (this.getbalance() < limitOfCard) {
+            interestAccrued += (limitOfCard - getbalance()) * (interestRate / days) / 100;
         }
     }
 
     // Начисление комиссионных
     @Override
-    public void substractionCommissions() {
+    public void addedCommissions() {
         interestCommission += getCommission();
     }
 
@@ -96,5 +96,10 @@ public class CreditAccount extends Account{
 
         super.addedSum(balance);
 
+    }
+
+    @Override
+    public void substractionSum(int balance) throws InsufficientFundsException {
+        this.addedSum(balance * (-1));
     }
 }

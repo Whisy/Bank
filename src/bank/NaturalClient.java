@@ -2,159 +2,158 @@ package bank;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 public class NaturalClient implements Client{
-    String name;
-    String surname;
-    int series;
-    int numberOfThePassport;
-    ArrayList<Account> accountList;
-
-    public Account[] accounts;
+    private String name;
+    private String surname;
+    private int series;
+    private int numberOfThePassport;
+    private List<Account> accountList = new ArrayList<Account>();
 
     NaturalClient(String name, String surname, int series, int numberOfThePassport) {
         this.name = name;
         this.surname = surname;
         this.series = series;
         this.numberOfThePassport = numberOfThePassport;
-        accounts = new Account[0];
     }
 
-    NaturalClient(String name, String surname, int series, int numberOfThePassport, Account[] Accounts) {
+    NaturalClient(String name, String surname, int series, int numberOfThePassport, List<Account> acc) {
         this.name = name;
         this.surname = surname;
         this.series = series;
         this.numberOfThePassport = numberOfThePassport;
-        this.accounts = Accounts;
+        accountList = acc;
     }
 
 
     public void numberException(int number) {
-        for (Account acc : accounts) {
-            if (acc.number == number) throw new DuplicateAccountNumber();
+        for (Account acc : accountList) {
+            if (acc.getnumber() == number) throw new DuplicateAccountNumber();
         }
     }
 
     public int score(int number) {
-        int i = 0;
-        for (i = 0; i < accounts.length; i++)
-            if (number == (accounts[i].getnumber()))
-                break;
-        return accounts[i].getbalance();
-
+        for (Account acc: accountList) {
+            if (acc.getnumber() == number) {
+                return acc.getbalance();
+            }
+        }
+        return 0;
     }
-    public Account[] getAccounts(){
-        return accounts;
+    public List<Account> getAccounts(){
+        return accountList;
     }
 
     public int rest(){
-        int i = 0;
         int sum = 0;
-        for(i = 0; i< accounts.length; i++)
-            sum +=accounts[i].getbalance();
+        for (Account acc : accountList) {
+            sum += acc.getbalance();
+        }
         return sum;
     }
 
-    public Account[] positiveBalance(){
-        accountList = new ArrayList<Account>();
-        for (Account acc : accounts) {
-            if (acc.getbalance() > 0) accountList.add(acc);
+    public List<Account> positiveBalance(){
+        List<Account> accountList2 = new ArrayList<Account>();
+        for (Account acc : accountList) {
+            if (acc.getbalance() > 0) accountList2.add(acc);
         }
-        if (accountList.size() == 0) return null;
-        else return accountList.toArray(new Account[accountList.size()-1]);
+        if (accountList2.size() == 0) return null;
+        else return accountList2;
 
     }
 
     public void delete(int number) {
-        int i;
-        Account[] newAccounts = new Account[accounts.length-1];
-        for(i=0; i<accounts.length; i++) {
-            if (number==accounts[i].getnumber())
-                break;
 
+        List<Account> accountList2 = new ArrayList<Account>();
+        for (Account acc : accountList) {
+            if (acc.getnumber() != number)
+                accountList2.add(acc);
         }
-        if (i==accounts.length)
+        if (accountList2.size() == accountList.size())
             System.out.println("The account number isn't found. Recheck data. ");
         else {
-            System.arraycopy(accounts, 0, newAccounts, 0, i);
-            System.arraycopy(accounts, i + 1, newAccounts, i, newAccounts.length - i);
+            accountList.clear();
+            accountList = accountList2;
         }
-        accounts=newAccounts;
-
     }
+
     public void off() {
         int h = 0;
-        for(h=0; h < accounts.length; h++)
-            System.out.println(accounts[h].getnumber() + " , " + accounts[h].getbalance() );
+        for(Account acc : accountList)
+            System.out.println(acc.getnumber() + " , " + acc.getbalance() );
     }
 
-    public void newScore(int number, int balance) {
+    public void newDebitScore(int number, int balance) {
         numberException(number);
-        Account[] newAccounts = new Account[accounts.length+1];
-        System.arraycopy(accounts, 0, newAccounts, 0, accounts.length);
-        newAccounts[ newAccounts.length-1]=new DebitAccount(number, balance);
-        accounts = newAccounts;
+        accountList.add(new DebitAccount(number, balance));
+    }
+
+    public void newCreditScore(int number, int balance) {
+        numberException(number);
+        accountList.add(new CreditAccount(number, balance));
     }
 
     public void reductionOfTheScore(int number, int reductionOfTheScore) throws InsufficientFundsException {
-        int i = 0 ;
-        for (i = 0; i < accounts.length; i++)
-            if (number == (accounts[i].getnumber()))
-                break;
+        boolean substraction = false;
+        for (Account acc : accountList) {
+            if (acc.getnumber() == number) {
+                acc.substractionSum(reductionOfTheScore);
+                substraction = true;
+            }
+            break;
+        }
 
-        if(i==accounts.length)
+        if(!substraction)
             System.out.println("The account number isn't found. Recheck data. ");
-        else accounts[i].substractionSum(reductionOfTheScore);
 
     }
 
     public void increaseOfTheScore(int number, int increaseOfTheScore){
-        int i = 0;
-        for (i = 0; i < accounts.length; i++)
-            if (number == (accounts[i].getnumber()))
-                break;
+        boolean substraction = false;
+        for (Account acc : accountList) {
+            if (acc.getnumber() == number) {
+                acc.addedSum(increaseOfTheScore);
+                substraction = true;
+            }
+            break;
+        }
 
-        if(i==accounts.length)
+        if(!substraction)
             System.out.println("The account number isn't found. Recheck data. ");
-        else accounts[i].addedSum(increaseOfTheScore);
 
     }
 
 
     @Override
     public Account getReference(int number) {
-        for (int i = 0; i < accounts.length; i++) {
-            if (accounts[i].getnumber() == number) return accounts[i];
+        for (int i = 0; i < accountList.size(); i++) {
+            if (accountList.get(i).getnumber() == number) return accountList.get(i);
         }
         return null;
     }
 
     @Override
     public ArrayList<Account> geAllAccountList() {
-        return new ArrayList<Account>(Arrays.asList(accounts));
+        return (ArrayList<Account>)accountList;
     }
 
     @Override
     public ArrayList<Account> getDebitAccountList() {
-        accountList.clear();
-        for (int i = 0; i < accounts.length; i++) {
-            if (accounts[i].getClass() == DebitAccount.class) {
-                accountList.add(accounts[i]);
-            }
+        ArrayList<Account> accounts = new ArrayList<>();
+        for (Account acc : accountList) {
+            if (acc instanceof DebitAccount) accounts.add(acc);
         }
-        return accountList;
+        return accounts;
     }
 
     @Override
     public ArrayList<Account> getCreditAccountList() {
-        accountList.clear();
-        for (int i = 0; i < accounts.length; i++) {
-            if (accounts[i].getClass() == CreditAccount.class) {
-                accountList.add(accounts[i]);
-            }
+        ArrayList<Account> accounts = new ArrayList<>();
+        for (Account acc : accountList) {
+            if (acc instanceof CreditAccount) accounts.add(acc);
         }
-        return accountList;
+        return accounts;
     }
 
     @Override
@@ -165,23 +164,21 @@ public class NaturalClient implements Client{
     @Override
     public long getTotalCreditBalance() {
         long total = 0;
-        for (int i = 0; i < accounts.length; i++) {
-            if (accounts[i].getClass() == CreditAccount.class) {
-                total += accounts[i].getbalance();
-            }
+        for (Account acc : accountList) {
+            if (acc instanceof CreditAccount) total += acc.getbalance();
         }
         return total;
     }
 
     @Override
     public ArrayList<Account> getDebitCreditCardsOfPlus() {
-        accountList = new ArrayList<Account>();
-        for (Account acc : accounts) {
+        ArrayList<Account> accountList2 = new ArrayList<Account>();
+        for (Account acc : accountList) {
             if (acc.getbalance() > 0) {
-                accountList.add(acc);
+                accountList2.add(acc);
             }
         }
-        return accountList;
+        return accountList2;
     }
 
     @Override
@@ -191,18 +188,13 @@ public class NaturalClient implements Client{
 
     @Override
     public void AddAccount(Account account) {
-        Account[] tempAccounts = new Account[accounts.length+1];
-        tempAccounts = accounts.clone();
-        tempAccounts[tempAccounts.length-1] = account;
-        accounts = new Account[tempAccounts.length];
-        accounts = tempAccounts.clone();
-
+        accountList.add(account);
     }
 
     @Override
     public void substractSum(int number, int balance) throws InsufficientFundsException {
-        for (int i = 0; i < accounts.length; i++) {
-            if (accounts[i].getnumber() == number) accounts[i].substractionSum(balance);
+        for (Account acc : accountList) {
+            if (acc.getnumber() == number) acc.substractionSum(balance);
         }
     }
 
@@ -214,17 +206,14 @@ public class NaturalClient implements Client{
 }
 
     class Demo {
-        public static void main(String[] args) {
+        public static void main(String[] args) throws InsufficientFundsException {
             NaturalClient cli = new NaturalClient("Petr", "Ivanov", 3610, 233729);
-            cli.accounts = new Account[3];
-            cli.accounts[0] = new DebitAccount(28898765, 701);
-            cli.accounts[1] = new DebitAccount(23334567, 5789);
-            cli.accounts[2] = new DebitAccount(44446789, 710);
+            cli.newDebitScore(28898765, 701);
+            cli.newCreditScore(23334567, 5789);
+            cli.newDebitScore(44446789, 710);
             cli.off();
-            Account[] acc = cli.positiveBalance();
-            for (int i = 0; i < acc.length; i++) {
-                System.out.println("Positive balance: " + acc[i].getbalance());
-            }
+            cli.substractSum(23334567, 6000);
+            cli.substractSum(44446789, 6000);
             cli.off();
 
 
